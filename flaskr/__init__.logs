@@ -7,8 +7,8 @@
 2022-12-17 01:02:35,854 INFO     127.0.0.1 - - [17/Dec/2022 01:02:35] "GET /all-file-data HTTP/1.1" 200 -
 2022-12-17 01:02:56,344 INFO     127.0.0.1 - - [17/Dec/2022 01:02:56] "GET /all-file-data HTTP/1.2022-12-17 02:34:16,739 INFO      * Restarting with stat
 2022-12-17 02:37:30,190 INFO      * Restarting with stat
-
-2022-12-17 01:13:00,592 INFO     127.0.0.1 - - [17/Dec/2022 01:13:00] "GET /all-file-data HTTP/1.1" 200 -
+2022-12-17 02:41:05,285 INFO      * Restarting with stat
+022 01:13:00] "GET /all-file-data HTTP/1.1" 200 -
 2022-12-17 01:13:02,954 INFO     127.0.0.1 - - [17/Dec/2022 01:13:02] "GET /all-file-data HTTP/1.1" 200 -
 2022-12-17 01:13:02,956 INFO     127.0.0.1 - - [17/Dec/2022 01:13:02] "GET /all-file-data HTTP/1.1" 200 -
 2022-12-17 01:13:23,727 INFO     127.0.0.1 - - [17/Dec/2022 01:13:23] "GET /all-file-data HTTP/1.1" 200 -

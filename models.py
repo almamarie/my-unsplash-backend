@@ -130,7 +130,7 @@ class FilesData(db.Model):
     def format(self):
         return {
             "url": self.url,
-            "label": self.url
+            "label": self.label
         }
 
     def __repr__(self):
