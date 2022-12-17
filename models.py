@@ -5,6 +5,7 @@ from cloudinary_util import cloudinaryUtils
 import json
 import logging
 import re
+import time
 
 
 cloud = cloudinaryUtils()
@@ -27,6 +28,16 @@ class UserDetails(db.Model):
     username = db.Column(db.String(), primary_key=True, nullable=False)
     password = db.Column(db.String(), nullable=False)
 
+    @staticmethod
+    def verify_user(username: str, password: str) -> bool:
+        """verifies user"""
+        userDetails: UserDetails = UserDetails.query.filter(
+            UserDetails.username == username).one_or_none()
+        if userDetails == None:
+            return False
+
+        return userDetails.verify_password(password)
+
     def get_user_name(self) -> str:
         """returns the name of the user"""
         return self.username
@@ -35,7 +46,7 @@ class UserDetails(db.Model):
         """returns the password of the user"""
         return self.password
 
-    def verify_user(self, password: str) -> bool:
+    def verify_password(self, password: str) -> bool:
         """Verifies if the given password is same as the user's password."""
         return self.password == password
 
@@ -44,11 +55,13 @@ class FilesData(db.Model):
 
     url = db.Column(db.String(), primary_key=True, nullable=False)
     label = db.Column(db.String(), nullable=False)
+    timestamp = db.Column(db.Float(), nullable=True)
 
     def __init__(self, url: str, label: str) -> None:
         logging.debug("inserting fields to their respective attributes...")
         self.set_url(url)
         self.set_label(label)
+        self.timestamp = time.time()
         logging.debug("done.")
 
     def set_label(self, label: str) -> None:
