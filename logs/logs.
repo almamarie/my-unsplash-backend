@@ -1,0 +1,5 @@
+DEBUG:root:Configuring database
+DEBUG:root:Done configuring database
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 134-636-114
+INFO:werkzeug: * Detected change in '/Users/digitalhouse/Documents/src/fullstack_projects/my-unsplash-master/my-unsplash-backend/flaskr/__init__.py', reloading

@@ -1,3 +1,4 @@
+import time
 from flask import Flask, request, abort, jsonify
 from models import setup_db, db, FilesData, UserDetails
 from flask_cors import CORS
@@ -5,19 +6,28 @@ from models import FilesData
 import sys
 from flask_moment import Moment
 from flask_migrate import Migrate
-import json
+import logging
+
+# set up logging
+logging.basicConfig(level=logging.DEBUG,
+                    format="{asctime} {levelname:<8} {message}",
+                    style="{",
+                    # filename='{}logs'.format(__file__[:-2]),
+                    # filemode='w'
+                    )
 
 # to be removed
-import time
 
 
 def create_app(test_config=None):
+    logging.debug("configuring app...")
     app = Flask(__name__)
     setup_db(app)
     CORS(app, resources={
-         r"/api/": {"origins": "http://localhost:3000"}})
+         r"/api/": {"origins": "http://localhost:3000/*"}})
     moment = Moment(app)
     migrate = Migrate(app, db)
+    logging.debug("done.")
 
     @app.after_request
     def after_request(response):
@@ -43,33 +53,43 @@ def create_app(test_config=None):
     def main_route():
         return jsonify({"success": True, "message": "Configuration Successful"})
 
-    @app.route("/upload", methods=["POST"])
+    @app.route("/new-photo", methods=["POST"])
     def upload_photo():
+        """creates a new photo entry"""
+
         try:
-            print("Received request to add new file data")
-            file = request.files.get("file")
+            print("request: ", request)
+            body: dict = request.get_json()
+            logging.debug("received request to add new file.")
+            logging.debug("requedst data: {}".format(body))
 
-            print("Request file: ", file)
+            # create the new entry
+            file_entry_object = FilesData.create_new_entry(
+                body.get("url"), body.get("label"))
 
-            print("creating new FilesData model...")
-            file_data = FilesData.create_new_file(file)
-            print("done.")
-
-            # Insert file data into database
-            print("Inserting data into database...")
-            new_file_data = file_data.insert()
-            print("done inserting data into database")
-
-            # return success and new file data
-            return_data = {
-                "success": True,
-                "fileData": new_file_data
-            }
-            print("Returning: ", json.dumps(return_data))
-            return jsonify({"success": True, "fileData": return_data})
+            # Add data to database
+            logging.debug("adding data to database")
+            file_entry_object.insert()
+            return jsonify({"success": True})
         except:
             print(sys.exc_info())
             abort(400)
+
+    @app.route("/all-file-data")
+    def fetch_all_file_data() -> dict:
+        # fetch all the file data from the database
+        all_file_data: list = FilesData.query.all()
+
+        # format the files data
+        formated_data: list[dict] = [file_data.format()
+                                     for file_data in all_file_data]
+
+        # return the data
+        return jsonify({
+            "success": True,
+            "items": formated_data,
+            "totalNumber": len(formated_data)
+        })
 
     @app.errorhandler(404)
     def not_found(error):

@@ -1,23 +1,20 @@
 # test imports
-from datetime import datetime
 import unittest
 import json
 from flask_sqlalchemy import SQLAlchemy
-from config import SQLALCHEMY_DATABASE_URI
 from flaskr import create_app
-
-# from config import SQLALCHEMY_DATABASE_URI
 from models import UserDetails, FilesData, setup_db
+from config import SQLALCHEMY_DATABASE_URI
 
 
-class HrsTestCase(unittest.TestCase):
+class UnsplashTesCase(unittest.TestCase):
     """This class represents the Human rights situation test case"""
 
     def setUp(self):
         """Define test variables and initialize app."""
         self.app = create_app()
         self.client = self.app.test_client
-        self.database_name = "fileupload"
+        self.database_name = "unsplash"
         self.database_path = SQLALCHEMY_DATABASE_URI
 
         # binds the app to the current context

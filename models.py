@@ -4,6 +4,7 @@ from datetime import datetime
 from cloudinary_util import cloudinaryUtils
 import json
 import logging
+import re
 
 
 cloud = cloudinaryUtils()
@@ -11,14 +12,14 @@ db = SQLAlchemy()
 
 
 def setup_db(app, database_path=SQLALCHEMY_DATABASE_URI):
-    logging.info("Configuring database")
+    logging.debug("Configuring database")
     app.config["SQLALCHEMY_DATABASE_URI"] = database_path
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.app_context().push()
     db.app = app
     db.init_app(app)
     db.create_all()
-    logging.info("Done configuring database")
+    logging.debug("Done configuring database")
 
 
 class UserDetails(db.Model):
@@ -34,51 +35,88 @@ class UserDetails(db.Model):
         """returns the password of the user"""
         return self.password
 
+    def verify_user(self, password: str) -> bool:
+        """Verifies if the given password is same as the user's password."""
+        return self.password == password
+
 
 class FilesData(db.Model):
 
     url = db.Column(db.String(), primary_key=True, nullable=False)
     label = db.Column(db.String(), nullable=False)
 
-    def __init__(self, data):
-        print("inserting fields in their respective attributes...")
-        try:
-            self.file_name = data.get("name")
-            self.public_id = data.get("publicId")
-            self.file_url = data.get("url")
-            self.upload_date = data.get("uploadDate")
-        except:
-            raise Exception("Missing fields")
-        print("done.")
+    def __init__(self, url: str, label: str) -> None:
+        logging.debug("inserting fields to their respective attributes...")
+        self.set_url(url)
+        self.set_label(label)
+        logging.debug("done.")
+
+    def set_label(self, label: str) -> None:
+        """Sets the label of the class"""
+        #
+        # validater the label
+        #
+        logging.debug("verifying label...")
+        if (self.validate_label(label) == False):
+            raise AttributeError("Invalid label")
+        logging.debug("done.")
+        logging.debug("setting label to {}".format(label))
+        self.label = label
+
+    def validate_label(self, label: str) -> bool:
+        """Verifies that the label is a string"""
+        return type(label) == str
+
+    def set_url(self, url: str) -> None:
+        """Sets the url of the file entry"""
+        #
+        # verify the url
+        #
+        logging.debug("verifying url...")
+        if (self.validate_url(url) == False):
+            raise AttributeError("Invalid url")
+        logging.debug("done.")
+        #
+        # add it
+        #
+        logging.debug("setting url to {}".format(url))
+        self.url = url
+
+    def validate_url(self, url: str) -> bool:
+        """Checks if the given string is a valid url"""
+
+        # url length must not be greater than 256
+        if len(url) > 256:
+            return False
+
+        # regex checks if the url is valid
+        regex = r"(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'\".,<>?«»“”‘’]))"
+        urls = re.findall(regex, url)
+        return len(urls) == 1
 
     @classmethod
-    def create_new_file(cls, file):
-        print("checking if file exists in data...")
-        file_in_database = FilesData.query.filter(
-            FilesData.file_name == file.filename).one_or_none()
+    def create_new_entry(cls, url: str, label: str):
+        """This function creates a new entry from url and label"""
+        #
+        # check if file exists
+        #
+        logging.debug("checking if file exists in database...")
+        entry_exists = FilesData.query.filter(
+            FilesData.url == url).one_or_none()
 
-        if file_in_database:
-            print("file exists in database")
-            raise Exception("File already exists in database")
+        if entry_exists:
+            logging.debug("file exists in database")
+            raise AttributeError("File already exists in database")
 
-        print("done: file does not exist in database.")
+        logging.debug("done: file does not exist in database.")
 
-        # upload file
-        print("uploading file...")
-        upload_data = cloud.uploadFile(file)
-        print("done.")
-
-        data = {
-            "name": file.filename,
-            "publicId": upload_data.get("public_id"),
-            'url': upload_data.get('url'),
-            "uploadDate": datetime.now().strftime("%d/%m/%Y %H:%M:%S")
-        }
-        print("creating object...")
-        return cls(data)
+        #
+        # create and return the class object
+        #
+        logging.debug("creating object...")
+        return cls(url, label)
 
     def insert(self) -> None:
-
         db.session.add(self)
         db.session.commit()
 
@@ -90,7 +128,10 @@ class FilesData(db.Model):
         db.session.commit()
 
     def format(self):
-        return
+        return {
+            "url": self.url,
+            "label": self.url
+        }
 
     def __repr__(self):
         return json.dumps(self.format())
