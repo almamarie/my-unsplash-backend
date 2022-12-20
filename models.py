@@ -23,7 +23,7 @@ def setup_db(app, database_path=SQLALCHEMY_DATABASE_URI):
     logging.debug("Done configuring database")
 
 
-class UserDetails(db.Model):
+class UnsplashUserDetails(db.Model):
     """Contains the details of the user"""
     username = db.Column(db.String(), primary_key=True, nullable=False)
     password = db.Column(db.String(), nullable=False)
@@ -31,8 +31,8 @@ class UserDetails(db.Model):
     @staticmethod
     def verify_user(username: str, password: str) -> bool:
         """verifies user"""
-        userDetails: UserDetails = UserDetails.query.filter(
-            UserDetails.username == username).one_or_none()
+        userDetails: UnsplashUserDetails = UnsplashUserDetails.query.filter(
+            UnsplashUserDetails.username == username).one_or_none()
         if userDetails == None:
             return False
 
@@ -51,7 +51,7 @@ class UserDetails(db.Model):
         return self.password == password
 
 
-class FilesData(db.Model):
+class UnsplashFilesData(db.Model):
 
     url = db.Column(db.String(), primary_key=True, nullable=False)
     label = db.Column(db.String(), nullable=False)
