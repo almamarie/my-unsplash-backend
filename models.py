@@ -31,12 +31,14 @@ class UnsplashUserDetails(db.Model):
     @staticmethod
     def verify_user(username: str, password: str) -> bool:
         """verifies user"""
-        userDetails: UnsplashUserDetails = UnsplashUserDetails.query.filter(
+        user_details: UnsplashUserDetails = UnsplashUserDetails.query.filter(
             UnsplashUserDetails.username == username).one_or_none()
-        if userDetails == None:
+        logging.debug(
+            f"fetched the user with username {username} from the database: {user_details}")
+        if user_details == None:
             return False
 
-        return userDetails.verify_password(password)
+        return user_details.verify_password(password)
 
     def get_user_name(self) -> str:
         """returns the name of the user"""
@@ -48,6 +50,10 @@ class UnsplashUserDetails(db.Model):
 
     def verify_password(self, password: str) -> bool:
         """Verifies if the given password is same as the user's password."""
+        print(self.username)
+        logging.debug(
+            f"verifying password: {password} == {self.password} is {password==self.password}")
+
         return self.password == password
 
 
@@ -114,8 +120,8 @@ class UnsplashFilesData(db.Model):
         # check if file exists
         #
         logging.debug("checking if file exists in database...")
-        entry_exists = FilesData.query.filter(
-            FilesData.url == url).one_or_none()
+        entry_exists = UnsplashFilesData.query.filter(
+            UnsplashFilesData.url == url).one_or_none()
 
         if entry_exists:
             logging.debug("file exists in database")
