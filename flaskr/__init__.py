@@ -84,6 +84,7 @@ def create_app(test_config=None):
         # format the files data
         formated_data: list[dict] = [file_data.format()
                                      for file_data in all_file_data]
+        print("returning: ", formated_data)
 
         # return the data
         return jsonify({
