@@ -104,14 +104,19 @@ def create_app(test_config=None):
             f"verifying user: username ({username}) password ({password})")
         isVerified: bool = UnsplashUserDetails.verify_user(username, password)
 
-        # TODO: for some reason the code keeps fetching empty user data from the database so I am goind to hard code the password value here
-        # until I fix on the error. I will do this by changin in the if statement below, (if isVerified == False) to (if isVerified == False or password != 'postgres')
+        # TODO: for some reason the code keeps fetching empty user data from the database so I am going to hard code the password value here
+        # until I fix on the error. I will do this by changing the expression in the if statement below, (if isVerified == False) to (if password != 'postgres')
         logging.info(password == 'postgres')
         if password != 'postgres':
             return jsonify({
                 "success": False,
                 "message": "your username or password is incorrect"
             })
+        # if isVerified == False:
+        #     return jsonify({
+        #         "success": False,
+        #         "message": "your username or password is incorrect"
+        #     })
 
         # fetch the url entry from the database
         logging.info("fetching picture from database...")
